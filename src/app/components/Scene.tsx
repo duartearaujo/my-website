@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
 import gsap from "gsap";
 import { Html } from "@react-three/drei";
@@ -82,9 +82,15 @@ type SphereProps = {
 
 function Sphere(props: SphereProps) {
 
+    const { viewport } = useThree();
     const sphereRef = useRef<Mesh>(null);
     const materialRef = useRef(null);
     const jointID = props.id.replace(' ', '');
+
+    // Adjust the scale based on the viewport size
+    const new_scale = props.scale * (viewport.width / 1000);
+    const new_labelPos = props.labelPos.map(coord => coord * (viewport.width / 1000)) as [number, number, number];
+    const new_position = props.position.map(coord => coord * (viewport.width / 1000)) as [number, number, number];
 
     const onHover = () => {
         if (props.selected === null) {

@@ -31,7 +31,7 @@ export default function Section({ children, isVisible, selected, selection, id }
     return (
         <>
             {selected === id ? (
-                <section className="section flex flex-col w-full h-[calc(100%-(4rem))]" ref={sectionRef}> 
+                <section className="section flex flex-col w-full h-[calc(100vh-4rem)] shrink-0" ref={sectionRef}> 
                     {children}
                 </section>
             ) : null}

@@ -27,7 +27,7 @@ export default function ContactForm() {
     }
 
     return (
-        <form className="flex flex-col gap-5 p-5 font-sans bg-violet-950/60 backdrop-blur-md rounded-2xl w-full max-w-md mx-auto mt-64 fade" onSubmit={sendEmail}>
+        <form className="flex flex-col gap-5 p-5 font-sans bg-violet-950/60 backdrop-blur-md rounded-2xl w-full w-[90vw] max-w-md mx-auto my-auto fade" onSubmit={sendEmail}>
             <h2 className="text-2xl font-bold text-white text-center">Contact Me</h2>
             <input
                 type="text"
