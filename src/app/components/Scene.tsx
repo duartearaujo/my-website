@@ -82,7 +82,7 @@ type SphereProps = {
 
 function Sphere(props: SphereProps) {
 
-    const { viewport } = useThree();
+    // const { viewport } = useThree();
     const sphereRef = useRef<Mesh>(null);
     const materialRef = useRef(null);
     const jointID = props.id.replace(' ', '');
