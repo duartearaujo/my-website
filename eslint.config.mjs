@@ -14,7 +14,6 @@ const eslintConfig = [
   ...compat.config({
     rules: {
       "react/no-unescaped-entities": "off",
-      "no-unused-vars": "off",
     }}),
 ];
 

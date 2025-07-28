@@ -88,9 +88,9 @@ function Sphere(props: SphereProps) {
     const jointID = props.id.replace(' ', '');
 
     // Adjust the scale based on the viewport size
-    const new_scale = props.scale * (viewport.width / 1000);
-    const new_labelPos = props.labelPos.map(coord => coord * (viewport.width / 1000)) as [number, number, number];
-    const new_position = props.position.map(coord => coord * (viewport.width / 1000)) as [number, number, number];
+    // const new_scale = props.scale * (viewport.width / 1000);
+    // const new_labelPos = props.labelPos.map(coord => coord * (viewport.width / 1000)) as [number, number, number];
+    // const new_position = props.position.map(coord => coord * (viewport.width / 1000)) as [number, number, number];
 
     const onHover = () => {
         if (props.selected === null) {
