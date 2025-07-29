@@ -62,7 +62,7 @@ export default function Home() {
 				</Text>
 			</Section>
 			<Section id={'Projects'} selection={setSelected} selected={selected} isVisible={isVisible} >
-				<div className="project-card-wrapper flex flex-row flex-wrap-reverse md:flex-nowrap p-5 gap-5 h-full w-full justify-center opacity-1">
+				<div className="project-card-wrapper flex flex-row flex-wrap-reverse md:flex-nowrap gap-5 h-full w-full justify-center opacity-1">
 					<div className="flex flex-col gap-5 w-3/4 opacity-1">
 						<ProjectCard>
 							<Image src="/projects/1.png" alt="Project" width={300} height={200} className="rounded-lg" />
