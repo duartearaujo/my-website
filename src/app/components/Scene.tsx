@@ -30,12 +30,12 @@ const sphereGeometry = new SphereGeometry(2.5, 64, 64);
 function Title({ text }: { text: string }) {
 
     const { viewport } = useThree();
-    const scalefactor = viewport.width < 6.5 ? 0.34 : 1; 
-    const pos = [0.3 * viewport.width / 2, 0.7 * viewport.height / 2, -15] as [number, number, number];
+    const scalefactor = viewport.width < 6.5 ? 0.4 : 1; 
+    const pos = [0.5 * viewport.width / 2, 0.7 * viewport.height / 2, -15] as [number, number, number];
 
     return (
         <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.2}>
-            <Text position={ pos } scale={1 * scalefactor} font="/fonts/Climate_Crisis/ClimateCrisis-Regular-VariableFont_YEAR.ttf" fontSize={4} strokeColor={"black"} strokeWidth={0.05} rotation={[0, (Math.PI/12), 0]}>
+            <Text position={ pos } scale={1 * scalefactor} font="/fonts/Climate_Crisis/ClimateCrisis-Regular-VariableFont_YEAR.ttf" fontSize={4} strokeColor={"black"} strokeWidth={0.05 / scalefactor} rotation={[0, (Math.PI/(12*scalefactor)), 0]}>
                 {text}
                 <meshBasicMaterial color="white" />
             </Text>
