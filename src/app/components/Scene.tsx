@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
 import gsap from "gsap";
 import { Html } from "@react-three/drei";
@@ -20,17 +20,22 @@ import { useGSAP } from "@gsap/react";
 import Ready from "./Ready";
 
 const info = [
-    { id: "About Me", position: [4, -1.5, 1] as [number, number, number], scale: 1, frag: planetfrag1, groupRtt: { x: 0, y: Math.PI/1.6, z: 0 }, groupPos: { x: 0.61, y: 1, z: 7 }, labelPos: [1.3, 0.5, 2] as [number, number, number] },
-    { id: "Projects", position: [-6.5, -0.8, -3] as [number, number, number], scale: 0.8, frag: planetfrag2, groupRtt: { x: 0, y: -Math.PI/1.6, z: 0 }, groupPos: { x: -3, y: 0.7, z: 7 }, labelPos: [-8.5, 0, -3] as [number, number, number] },
-    { id: "Contacts", position: [0.25, 1, -6.5] as [number, number, number], scale: 0.45, frag: planetfrag3, groupRtt: { x: Math.PI/4.8, y: 0, z: 0 }, groupPos: { x: -0.25, y: -3.6, z: 7.5 }, labelPos: [0.5, 0.5, -6] as [number, number, number] }
+    { id: "About Me", position: [0.5, -0.4, 1] as [number, number, number], scale: 1, frag: planetfrag1, groupRtt: { x: 0, y: Math.PI/1.6, z: 0 }, groupPos: { x: 0.61, y: 1, z: 7 }, labelPos: [-2, 1.5, 0] as [number, number, number] },
+    { id: "Projects", position: [-0.8, -0.2, -3] as [number, number, number], scale: 0.8, frag: planetfrag2, groupRtt: { x: 0, y: -Math.PI/1.6, z: 0 }, groupPos: { x: -3, y: 0.7, z: 7 }, labelPos: [2.5, 1, 0] as [number, number, number] },
+    { id: "Contacts", position: [0.035, 0.23, -6.5] as [number, number, number], scale: 0.45, frag: planetfrag3, groupRtt: { x: Math.PI/4.8, y: 0, z: 0 }, groupPos: { x: -0.25, y: -3.6, z: 7.5 }, labelPos: [1, -1.5, 0] as [number, number, number] }
 ]
 
 const sphereGeometry = new SphereGeometry(2.5, 64, 64);
 
 function Title({ text }: { text: string }) {
+
+    const { viewport } = useThree();
+    const scalefactor = viewport.width < 6.5 ? 0.34 : 1; 
+    const pos = [0.3 * viewport.width / 2, 0.7 * viewport.height / 2, -15] as [number, number, number];
+
     return (
         <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.2}>
-            <Text position={ [2, 3, -15] } font="/fonts/Climate_Crisis/ClimateCrisis-Regular-VariableFont_YEAR.ttf" fontSize={4} strokeColor={"black"} strokeWidth={0.05} rotation={[0, (Math.PI/12), 0]}>
+            <Text position={ pos } scale={1 * scalefactor} font="/fonts/Climate_Crisis/ClimateCrisis-Regular-VariableFont_YEAR.ttf" fontSize={4} strokeColor={"black"} strokeWidth={0.05} rotation={[0, (Math.PI/12), 0]}>
                 {text}
                 <meshBasicMaterial color="white" />
             </Text>
@@ -82,15 +87,25 @@ type SphereProps = {
 
 function Sphere(props: SphereProps) {
 
-    // const { viewport } = useThree();
+    const { viewport } = useThree();
     const sphereRef = useRef<Mesh>(null);
     const materialRef = useRef(null);
     const jointID = props.id.replace(' ', '');
 
+    console.log(viewport.width, viewport.height);
+
     // Adjust the scale based on the viewport size
-    // const new_scale = props.scale * (viewport.width / 1000);
-    // const new_labelPos = props.labelPos.map(coord => coord * (viewport.width / 1000)) as [number, number, number];
-    // const new_position = props.position.map(coord => coord * (viewport.width / 1000)) as [number, number, number];
+    const scalefactor = viewport.width < 6.5 ? 0.6 : 1; 
+    
+    const new_labelPos = [props.labelPos[0] * viewport.width / 2,
+                          props.labelPos[1] * viewport.height / 2, 
+                          props.labelPos[2]
+                         ] as [number, number, number];
+
+    const new_position = [props.position[0] * viewport.width / 2,
+                          props.position[1] * viewport.height / 2, 
+                          props.position[2]
+                         ] as [number, number, number];
 
     const onHover = () => {
         if (props.selected === null) {
@@ -124,8 +139,8 @@ function Sphere(props: SphereProps) {
     });
 
     return (
-        <group>
-            <mesh ref={sphereRef} geometry={sphereGeometry} position={ props.position } scale={ props.scale } onClick={sphereHandler} onPointerEnter={onHover} onPointerLeave={leaveHover}>
+        <group position={ new_position } scale={ props.scale * scalefactor } onClick={sphereHandler} onPointerEnter={onHover} onPointerLeave={leaveHover}>
+            <mesh ref={sphereRef} geometry={sphereGeometry}  >
                 <CustomShaderMaterial 
                     ref={materialRef}
                     baseMaterial={MeshPhysicalMaterial} 
@@ -138,7 +153,7 @@ function Sphere(props: SphereProps) {
             </mesh>
             <Float speed={1.3} rotationIntensity={0.3} floatIntensity={0.3}>
                 <Html position={props.labelPos} center>
-                    <div className={`${jointID} w-36 text-center text-white font-sans font-bold text-lg rounded-md bg-violet-950/60 backdrop-blur-md p-2 pointer-events-none ${(props.selected !== null) ? 'animate-fadeOut opacity-0' : 'animate-fadeIn'}`} style={{ transform: `scale(${props.scale})`}}>
+                    <div className={`${jointID} w-36 text-center text-white font-sans font-bold text-lg rounded-md bg-violet-950/60 backdrop-blur-md p-2 ${(props.selected !== null) ? 'animate-fadeOut opacity-0' : 'animate-fadeIn'}`} style={{ transform: `scale(${props.scale})`}} >
                         {props.id.toUpperCase()}
                     </div>
                 </Html>
