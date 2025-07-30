@@ -96,11 +96,6 @@ function Sphere(props: SphereProps) {
 
     // Adjust the scale based on the viewport size
     const scalefactor = viewport.width < 6.5 ? 0.6 : 1; 
-    
-    const new_labelPos = [props.labelPos[0] * viewport.width / 2,
-                          props.labelPos[1] * viewport.height / 2, 
-                          props.labelPos[2]
-                         ] as [number, number, number];
 
     const new_position = [props.position[0] * viewport.width / 2,
                           props.position[1] * viewport.height / 2, 
