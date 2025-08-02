@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
 import gsap from "gsap";
@@ -18,7 +18,6 @@ import planetfrag3 from '@/app/shaders/planetfrag3.glsl';
 import planetvert1 from '@/app/shaders/planetvert1.glsl';
 import { useGSAP } from "@gsap/react";
 import Ready from "./Ready";
-import { view } from "motion/react-client";
 
 const info = [
     { 
@@ -215,7 +214,7 @@ function MeshGroup({ setIsVisible, selection, selected }: { setIsVisible: (id: s
         let groupPos = { x: 0, y: 0, z: 0 };
         let groupRtt = { x: 0, y: 0, z: 0 };
 
-        let size: 'sm' | 'md' | 'lg' = viewport.width <= 6.5 ? 'sm' : viewport.width <= 10 ? 'md' : 'lg';
+        const size: 'sm' | 'md' | 'lg' = viewport.width <= 6.5 ? 'sm' : viewport.width <= 10 ? 'md' : 'lg';
 
         const selectedSphere = info.find(item => item.id === selected);
         
