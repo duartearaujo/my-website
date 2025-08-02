@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
 import gsap from "gsap";
@@ -18,11 +18,60 @@ import planetfrag3 from '@/app/shaders/planetfrag3.glsl';
 import planetvert1 from '@/app/shaders/planetvert1.glsl';
 import { useGSAP } from "@gsap/react";
 import Ready from "./Ready";
+import { view } from "motion/react-client";
 
 const info = [
-    { id: "About Me", position: [0.5, -0.4, 1] as [number, number, number], scale: 1, frag: planetfrag1, groupRtt: { x: 0, y: Math.PI/1.6, z: 0 }, groupPos: { x: 0.61, y: 1, z: 7 }, labelPos: [-2, 1.5, 0] as [number, number, number] },
-    { id: "Projects", position: [-0.8, -0.2, -3] as [number, number, number], scale: 0.8, frag: planetfrag2, groupRtt: { x: 0, y: -Math.PI/1.6, z: 0 }, groupPos: { x: -3, y: 0.7, z: 7 }, labelPos: [2.5, 1, 0] as [number, number, number] },
-    { id: "Contacts", position: [0.035, 0.23, -6.5] as [number, number, number], scale: 0.45, frag: planetfrag3, groupRtt: { x: Math.PI/4.8, y: 0, z: 0 }, groupPos: { x: -0.25, y: -3.6, z: 7.5 }, labelPos: [1, -1.5, 0] as [number, number, number] }
+    { 
+        id: "About Me", 
+        position: [0.5, -0.4, 1] as [number, number, number], 
+        scale: 1, 
+        frag: planetfrag1, 
+        groupRtt: {
+                    'lg': { x: 0, y: Math.PI/1.6, z: 0 },
+                    'md': { x: 0, y: Math.PI/1.6, z: 0 },
+                    'sm': { x: 0, y: Math.PI/1.6, z: 0 }
+        }, 
+        groupPos: {
+                    'lg': { x: 0.61, y: 1, z: 7 },
+                    'md': { x: 0.61, y: 1, z: 7 },
+                    'sm': { x: 0.61, y: 1, z: 7 }
+        }, 
+        labelPos: [-2, 1.5, 0] as [number, number, number] 
+    },
+    { 
+        id: "Projects", 
+        position: [-0.8, -0.2, -3] as [number, number, number], 
+        scale: 0.8, 
+        frag: planetfrag2, 
+        groupRtt: {
+                    'lg': { x: 0, y: -Math.PI/1.6, z: 0 },
+                    'md': { x: 0, y: -Math.PI/1.6, z: 0 },
+                    'sm': { x: 0, y: -Math.PI/1.6, z: 0 }
+        }, 
+        groupPos: {
+                    'lg': { x: -3, y: 0.7, z: 7 },
+                    'md': { x: -3, y: 0.7, z: 7 },
+                    'sm': { x: -3, y: 0.7, z: 7 }
+        },  
+        labelPos: [2.5, 1, 0] as [number, number, number] 
+    },
+    { 
+        id: "Contacts", 
+        position: [0.035, 0.23, -6.5] as [number, number, number], 
+        scale: 0.45, 
+        frag: planetfrag3, 
+        groupRtt: {
+                    'lg': { x: Math.PI/4.8, y: 0, z: 0 },
+                    'md': { x: Math.PI/4.8, y: 0, z: 0 },
+                    'sm': { x: Math.PI/4.8, y: 0, z: 0 }
+        }, 
+        groupPos: {
+                    'lg': { x: -0.25, y: -3.6, z: 7.5 }, 
+                    'md': { x: -0.25, y: -3.6, z: 7.5 }, 
+                    'sm': { x: -0.25, y: -3.6, z: 7.5 }
+        },  
+        labelPos: [1, -1.5, 0] as [number, number, number] 
+    }
 ]
 
 const sphereGeometry = new SphereGeometry(2.5, 64, 64);
@@ -76,8 +125,8 @@ type SphereProps = {
     scale: number;
     position: [number, number, number];
     frag: string;
-    groupPos: { x: number; y: number; z: number };
-    groupRtt: { x: number; y: number; z: number };
+    groupPos: { 'sm': { x: number; y: number; z: number }; 'md': { x: number; y: number; z: number }; 'lg': { x: number; y: number; z: number } } | { x: number; y: number; z: number };
+    groupRtt: { 'sm': { x: number; y: number; z: number }; 'md': { x: number; y: number; z: number }; 'lg': { x: number; y: number; z: number } } | { x: number; y: number; z: number };
     labelPos: [number, number, number];
     selection: (id: string | null) => void;
     selected: string | null;
@@ -157,11 +206,27 @@ function Sphere(props: SphereProps) {
     );
 }
 
-export default function Scene({ setIsLoaded, isLoaded, setIsVisible, selection, selected }: { setIsLoaded: (bool: boolean) => void; isLoaded: boolean; setIsVisible: (id: string | null) => void; selection: (id: string | null) => void; selected: string | null }) {
+function MeshGroup({ setIsVisible, selection, selected }: { setIsVisible: (id: string | null) => void; selection: (id: string | null) => void; selected: string | null }) {
 
-    const scene = useRef(null);
     const groupRef = useRef<Group>(new Group());
-    
+    const { viewport } = useThree();
+
+    function getAnimationValues() {
+        let groupPos = { x: 0, y: 0, z: 0 };
+        let groupRtt = { x: 0, y: 0, z: 0 };
+
+        let size: 'sm' | 'md' | 'lg' = viewport.width <= 6.5 ? 'sm' : viewport.width <= 10 ? 'md' : 'lg';
+
+        const selectedSphere = info.find(item => item.id === selected);
+        
+        if (selectedSphere) {
+            groupPos = selectedSphere.groupPos[size as keyof typeof selectedSphere.groupPos];
+            groupRtt = selectedSphere.groupRtt[size as keyof typeof selectedSphere.groupRtt];
+        }
+
+        return { groupPos, groupRtt };
+    }
+
     const Light = () => {
         const directionalLight = useRef<DirectionalLight>(new DirectionalLight());
         return (
@@ -171,7 +236,7 @@ export default function Scene({ setIsLoaded, isLoaded, setIsVisible, selection, 
             </>
         );
     }
-    
+
     useGSAP(() => {
         if ((selected === null) && groupRef.current) {
             gsap.to(groupRef.current.rotation, {
@@ -190,51 +255,60 @@ export default function Scene({ setIsLoaded, isLoaded, setIsVisible, selection, 
             });
         } 
         else if (selected !== null && groupRef.current) {
-            const selectedSphere = info.find(item => item.id === selected);
-            if (selectedSphere) {
-                gsap.to(groupRef.current.rotation, {
-                    x: selectedSphere.groupRtt.x,
-                    y: selectedSphere.groupRtt.y,
-                    z: selectedSphere.groupRtt.z,
-                    duration: 1,
-                    ease: "power2.inOut"
-                });
-                gsap.to(groupRef.current.position, {
-                    x: selectedSphere.groupPos.x,
-                    y: selectedSphere.groupPos.y,
-                    z: selectedSphere.groupPos.z,
-                    duration: 1,
-                    ease: "power2.inOut"
-                });
-            }
+            const { groupPos, groupRtt } = getAnimationValues();
+            
+            gsap.to(groupRef.current.rotation, {
+                x: groupRtt.x,
+                y: groupRtt.y,
+                z: groupRtt.z,
+                duration: 1,
+                ease: "power2.inOut"
+            });
+            gsap.to(groupRef.current.position, {
+                x: groupPos.x,
+                y: groupPos.y,
+                z: groupPos.z,
+                duration: 1,
+                ease: "power2.inOut"
+            });
+            
         }
     }, [selected]);
+
+    return (
+        <group ref={groupRef}>
+            <Light />
+            <Title text="MY WEBSITE"/>
+            {info.map((item) => (
+                <Sphere 
+                    key={item.id}
+                    id={item.id} 
+                    scale={item.scale} 
+                    position={item.position} 
+                    frag={item.frag}
+                    groupPos={item.groupPos}
+                    groupRtt={item.groupRtt}
+                    labelPos={item.labelPos}
+                    selected={selected}
+                    selection={selection}
+                    setIsVisible={setIsVisible}
+                    groupRef={groupRef}
+                />    
+            ))}
+        </group>
+    );
+}
+
+export default function Scene({ setIsLoaded, isLoaded, setIsVisible, selection, selected }: { setIsLoaded: (bool: boolean) => void; isLoaded: boolean; setIsVisible: (id: string | null) => void; selection: (id: string | null) => void; selected: string | null }) {
+
+    const scene = useRef(null);
 
     return (
         <div ref={scene} className="fixed w-full h-full">
             <Canvas camera={{position: [0, 2, 5]}}>
                 {!isLoaded && <Ready setIsLoaded={setIsLoaded} />}
                 <Background />
-                <group ref={groupRef}>
-                    <Light />
-                    <Title text="MY WEBSITE"/>
-                    {info.map((item) => (
-                        <Sphere 
-                            key={item.id}
-                            id={item.id} 
-                            scale={item.scale} 
-                            position={item.position} 
-                            frag={item.frag}
-                            groupPos={item.groupPos}
-                            groupRtt={item.groupRtt}
-                            labelPos={item.labelPos}
-                            selected={selected}
-                            selection={selection}
-                            setIsVisible={setIsVisible}
-                            groupRef={groupRef}
-                        />    
-                    ))}
-                </group>
+                <MeshGroup setIsVisible={setIsVisible} selection={selection} selected={selected} />
             </Canvas>
         </div>
     );
