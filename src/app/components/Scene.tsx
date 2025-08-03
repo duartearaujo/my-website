@@ -36,8 +36,8 @@ const info = [
         }, 
         groupPos: {
                     'lg': { x: 0.61, y: 1, z: 7 },
-                    'md': { x: 0.61, y: 1, z: 7 },
-                    'sm': { x: 0.61, y: 1, z: 7 }
+                    'md': { x: 0, y: 1.5, z: 5.5 },
+                    'sm': { x: -0.5, y: 3, z: 4.5 }
         }, 
         labelPos: [-2, 1.5, 0] as [number, number, number] 
     },
@@ -57,8 +57,8 @@ const info = [
         }, 
         groupPos: {
                     'lg': { x: -3, y: 0.7, z: 7 },
-                    'md': { x: -3, y: 0.7, z: 7 },
-                    'sm': { x: -3, y: 0.7, z: 7 }
+                    'md': { x: -3, y: 0.7, z: 4 },
+                    'sm': { x: -3.5, y: 1.5, z: 3 }
         },  
         labelPos: [2.5, 1, 0] as [number, number, number] 
     },
@@ -78,8 +78,8 @@ const info = [
         }, 
         groupPos: {
                     'lg': { x: -0.25, y: -3.6, z: 7.5 }, 
-                    'md': { x: -0.25, y: -3.6, z: 7.5 }, 
-                    'sm': { x: -0.25, y: -3.6, z: 7.5 }
+                    'md': { x: -0.25, y: -3.5, z: 7.8 }, 
+                    'sm': { x: -0.5, y: -3.55, z: 8 }
         },  
         labelPos: [1, -1.5, 0] as [number, number, number] 
     }
