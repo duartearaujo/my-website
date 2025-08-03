@@ -22,7 +22,11 @@ import Ready from "./Ready";
 const info = [
     { 
         id: "About Me", 
-        position: [0.5, -0.4, 1] as [number, number, number], 
+        position: {
+                    'lg': [4, -1.5, 1] as [number, number, number],
+                    'md': [2.5, -1.5, 1] as [number, number, number],
+                    'sm': [1, -2.5, 1] as [number, number, number]
+        }, 
         scale: 1, 
         frag: planetfrag1, 
         groupRtt: {
@@ -39,7 +43,11 @@ const info = [
     },
     { 
         id: "Projects", 
-        position: [-0.8, -0.2, -3] as [number, number, number], 
+        position: {
+                    'lg': [-6.5, -0.8, -3] as [number, number, number],
+                    'md': [-3.5, -0.8, -3.5] as [number, number, number],
+                    'sm': [-1.5, -1, -4] as [number, number, number]
+        },
         scale: 0.8, 
         frag: planetfrag2, 
         groupRtt: {
@@ -56,7 +64,11 @@ const info = [
     },
     { 
         id: "Contacts", 
-        position: [0.035, 0.23, -6.5] as [number, number, number], 
+        position: {
+                    'lg': [0.25, 1, -6.5] as [number, number, number], 
+                    'md': [0.25, 1, -6.5] as [number, number, number],
+                    'sm': [0.5, 1.3, -6.5] as [number, number, number]
+        },
         scale: 0.45, 
         frag: planetfrag3, 
         groupRtt: {
@@ -78,7 +90,7 @@ const sphereGeometry = new SphereGeometry(2.5, 64, 64);
 function Title({ text }: { text: string }) {
 
     const { viewport } = useThree();
-    const scalefactor = viewport.width < 6.5 ? 0.4 : 1; 
+    const scalefactor = viewport.width < 4.5 ? 0.4 : viewport.width < 10 ? 0.6 : 1; 
     const pos = [0.5 * viewport.width / 2, 0.7 * viewport.height / 2, -15] as [number, number, number];
 
     return (
@@ -122,7 +134,7 @@ function Background() {
 type SphereProps = {
     id: string;
     scale: number;
-    position: [number, number, number];
+    position: {'sm': [number, number, number]; 'md': [number, number, number]; 'lg': [number, number, number]} | [number, number, number];
     frag: string;
     groupPos: { 'sm': { x: number; y: number; z: number }; 'md': { x: number; y: number; z: number }; 'lg': { x: number; y: number; z: number } } | { x: number; y: number; z: number };
     groupRtt: { 'sm': { x: number; y: number; z: number }; 'md': { x: number; y: number; z: number }; 'lg': { x: number; y: number; z: number } } | { x: number; y: number; z: number };
@@ -143,12 +155,16 @@ function Sphere(props: SphereProps) {
     console.log(viewport.width, viewport.height);
 
     // Adjust the scale based on the viewport size
-    const scalefactor = viewport.width < 6.5 ? 0.6 : 1; 
+    const scalefactor = viewport.width < 4.5 ? 0.6 : viewport.width < 10 ? 0.8 : 1; 
+    const viewSize = viewport.width < 4.5 ? 'sm' : viewport.width < 10 ? 'md' : 'lg';
 
+    const new_pos = props.position[viewSize as keyof typeof props.position];
+    /*
     const new_position = [props.position[0] * viewport.width / 2,
                           props.position[1] * viewport.height / 2, 
                           props.position[2]
                          ] as [number, number, number];
+    */
 
     const onHover = () => {
         if (props.selected === null) {
@@ -182,7 +198,7 @@ function Sphere(props: SphereProps) {
     });
 
     return (
-        <group position={ new_position } scale={ props.scale * scalefactor } onClick={sphereHandler} onPointerEnter={onHover} onPointerLeave={leaveHover}>
+        <group position={ new_pos } scale={ props.scale * scalefactor } onClick={sphereHandler} onPointerEnter={onHover} onPointerLeave={leaveHover}>
             <mesh ref={sphereRef} geometry={sphereGeometry}  >
                 <CustomShaderMaterial 
                     ref={materialRef}
