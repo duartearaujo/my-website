@@ -37,7 +37,7 @@ const info = [
         groupPos: {
                     'lg': { x: 0.61, y: 1, z: 7 },
                     'md': { x: 0, y: 1.5, z: 5.5 },
-                    'sm': { x: -0.5, y: 3, z: 4.5 }
+                    'sm': { x: -0.5, y: 2.5, z: 4 }
         }, 
         labelPos: [-2, 1.5, 0] as [number, number, number] 
     },
@@ -46,7 +46,7 @@ const info = [
         position: {
                     'lg': [-6.5, -0.8, -3] as [number, number, number],
                     'md': [-3.5, -0.8, -3.5] as [number, number, number],
-                    'sm': [-1.5, -1, -4] as [number, number, number]
+                    'sm': [-1.5, -1, -4.5] as [number, number, number]
         },
         scale: 0.8, 
         frag: planetfrag2, 
@@ -67,7 +67,7 @@ const info = [
         position: {
                     'lg': [0.25, 1, -6.5] as [number, number, number], 
                     'md': [0.25, 1, -6.5] as [number, number, number],
-                    'sm': [0.5, 1.3, -6.5] as [number, number, number]
+                    'sm': [1.5, 1.3, -7] as [number, number, number]
         },
         scale: 0.45, 
         frag: planetfrag3, 
@@ -79,7 +79,7 @@ const info = [
         groupPos: {
                     'lg': { x: -0.25, y: -3.6, z: 7.5 }, 
                     'md': { x: -0.25, y: -3.5, z: 7.8 }, 
-                    'sm': { x: -0.5, y: -3.55, z: 8 }
+                    'sm': { x: -1.5, y: -4, z: 8 }
         },  
         labelPos: [1, -1.5, 0] as [number, number, number] 
     }
@@ -90,11 +90,13 @@ const sphereGeometry = new SphereGeometry(2.5, 64, 64);
 function Title({ text }: { text: string }) {
 
     const { viewport } = useThree();
-    const scalefactor = viewport.width < 4.5 ? 0.4 : viewport.width < 10 ? 0.6 : 1; 
-    const pos = [0.5 * viewport.width / 2, 0.7 * viewport.height / 2, -15] as [number, number, number];
+    const scalefactor = viewport.width < 4.5 ? 0.5 : viewport.width < 10 ? 0.6 : 1; 
+    const defaultPos = [0.5 * viewport.width / 2, 0.7 * viewport.height / 2, -15] as [number, number, number];
+    const smallPos = [0.7 * viewport.width / 2, 1.2 * viewport.height / 2, -22] as [number, number, number];
+    const pos = viewport.width < 4.5 ? smallPos : defaultPos;
 
     return (
-        <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.2}>
+        <Float speed={1.5} rotationIntensity={0.2 * scalefactor} floatIntensity={0.2 * scalefactor}>
             <Text position={ pos } scale={1 * scalefactor} font="/fonts/Climate_Crisis/ClimateCrisis-Regular-VariableFont_YEAR.ttf" fontSize={4} strokeColor={"black"} strokeWidth={0.05 / scalefactor} rotation={[0, (Math.PI/(12*scalefactor)), 0]}>
                 {text}
                 <meshBasicMaterial color="white" />
@@ -155,7 +157,7 @@ function Sphere(props: SphereProps) {
     console.log(viewport.width, viewport.height);
 
     // Adjust the scale based on the viewport size
-    const scalefactor = viewport.width < 4.5 ? 0.6 : viewport.width < 10 ? 0.8 : 1; 
+    const scalefactor = viewport.width < 4.5 ? 0.8 : viewport.width < 10 ? 0.8 : 1; 
     const viewSize = viewport.width < 4.5 ? 'sm' : viewport.width < 10 ? 'md' : 'lg';
 
     const new_pos = props.position[viewSize as keyof typeof props.position];
