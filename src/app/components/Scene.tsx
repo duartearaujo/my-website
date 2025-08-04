@@ -227,12 +227,11 @@ function MeshGroup({ setIsVisible, selection, selected }: { setIsVisible: (id: s
 
     const groupRef = useRef<Group>(new Group());
     const { viewport } = useThree();
+    const size: 'sm' | 'md' | 'lg' = viewport.width <= 6.5 ? 'sm' : viewport.width <= 10 ? 'md' : 'lg';
 
     function getAnimationValues() {
         let groupPos = { x: 0, y: 0, z: 0 };
         let groupRtt = { x: 0, y: 0, z: 0 };
-
-        const size: 'sm' | 'md' | 'lg' = viewport.width <= 6.5 ? 'sm' : viewport.width <= 10 ? 'md' : 'lg';
 
         const selectedSphere = info.find(item => item.id === selected);
         
@@ -253,6 +252,14 @@ function MeshGroup({ setIsVisible, selection, selected }: { setIsVisible: (id: s
             </>
         );
     }
+
+    useGSAP(() => {
+        if (selected !== null && groupRef.current) {
+            const { groupPos, groupRtt } = getAnimationValues();
+            groupRef.current.position.set(groupPos.x, groupPos.y, groupPos.z);
+            groupRef.current.rotation.set(groupRtt.x, groupRtt.y, groupRtt.z);
+        }
+    }, [size]);
 
     useGSAP(() => {
         if ((selected === null) && groupRef.current) {
