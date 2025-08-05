@@ -15,8 +15,7 @@ varying vec2 vUv;
 vec3 colorA = vec3(0.0745, 0.0588, 0.0863);
 vec3 colorB = vec3(0.8941, 0.8902, 0.8902);
 
-void main() {
-    
+void main() {    
   float str = smoothstep(0.85, 0.9, sin(cnoise2(vUv * 7.0 + uTime * 0.1) * 20.0 + uTime * 0.5));
 
   vec3 colorC = vec3(vUv, 1.0);

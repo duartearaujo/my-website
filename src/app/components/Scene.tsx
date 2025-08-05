@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Float } from "@react-three/drei";
+import { Billboard, Float, Plane } from "@react-three/drei";
 import gsap from "gsap";
 import { Html } from "@react-three/drei";
 import { DirectionalLight, Group, MeshPhysicalMaterial, ShaderMaterial, SphereGeometry } from "three";
@@ -120,7 +120,7 @@ function Background() {
         vertexShader: vertex,
         fragmentShader: fragment,
         uniforms: {
-            uTime: { value: 0 }
+            uTime: { value: 0 },
         },
         depthWrite: false,
         depthTest: false
@@ -130,6 +130,29 @@ function Background() {
             <mesh ref={ref} material={material} position={[0, 0, -30]} renderOrder={-1}>
                 <planeGeometry args={[2, 2]} />
             </mesh>
+    );
+}
+
+// Label for the spheres representing the different sections of the site
+function Label({ children }: { children: string }) {
+    return (
+        <Float speed={1.3} rotationIntensity={0.3} floatIntensity={0.3}>
+            <Billboard> 
+                <Plane>
+                    <Text 
+                        font="/fonts/Climate_Crisis/ClimateCrisis-Regular-VariableFont_YEAR.ttf" 
+                        fontSize={2} 
+                        color="white" 
+                        strokeColor="black" 
+                        strokeWidth={0.05} 
+                        position={[0, 1.5, 0]} 
+                        rotation={[0, 0, 0]}
+                    >
+                        { children }
+                    </Text>
+                </Plane>
+            </Billboard>
+        </Float>
     );
 }
 
@@ -227,7 +250,7 @@ function MeshGroup({ setIsVisible, selection, selected }: { setIsVisible: (id: s
 
     const groupRef = useRef<Group>(new Group());
     const { viewport } = useThree();
-    const size: 'sm' | 'md' | 'lg' = viewport.width <= 6.5 ? 'sm' : viewport.width <= 10 ? 'md' : 'lg';
+    const size: 'sm' | 'md' | 'lg' = viewport.width <= 4.5 ? 'sm' : viewport.width <= 10 ? 'md' : 'lg';
 
     function getAnimationValues() {
         let groupPos = { x: 0, y: 0, z: 0 };
@@ -253,7 +276,7 @@ function MeshGroup({ setIsVisible, selection, selected }: { setIsVisible: (id: s
         );
     }
 
-    useGSAP(() => {
+    useEffect(() => {
         if (selected !== null && groupRef.current) {
             const { groupPos, groupRtt } = getAnimationValues();
             groupRef.current.position.set(groupPos.x, groupPos.y, groupPos.z);

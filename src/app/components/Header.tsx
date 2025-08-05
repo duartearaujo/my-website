@@ -7,7 +7,7 @@ gsap.registerPlugin(useGSAP);
 function HeaderButton({ children, onClick }: {children: string; onClick: (id: string) => void;}) {
     return (
         <button className="group relative p-2 grow-0" onClick={() => onClick(children)}>
-            <span className="relative z-10 bg-left-bottom bg-gradient-to-r from-white to-white bg-[length:0%_2px] bg-no-repeat group-hover:bg-[length:100%_2px] transition-all duration-300 ease-out lg:text-lg text-sm font-bold">
+            <span className="relative z-10 bg-left-bottom bg-gradient-to-r from-white to-white bg-[length:0%_2px] bg-no-repeat group-hover:bg-[length:100%_2px] transition-all duration-300 ease-out md:text-lg text-xs font-bold">
                 {children.toUpperCase()}
             </span>
         </button>
