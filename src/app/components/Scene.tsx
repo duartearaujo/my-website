@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Billboard, Float, Plane } from "@react-three/drei";
+import { Billboard, Float, RoundedBox } from "@react-three/drei";
 import gsap from "gsap";
 import { Html } from "@react-three/drei";
-import { DirectionalLight, Group, MeshPhysicalMaterial, ShaderMaterial, SphereGeometry } from "three";
+import { BufferGeometry, DirectionalLight, Group, MeshPhysicalMaterial, ShaderMaterial, SphereGeometry } from "three";
 import { Mesh } from "three";
 import { Text } from "@react-three/drei";
 import CustomShaderMaterial from "three-custom-shader-material";
@@ -18,6 +18,8 @@ import planetfrag3 from '@/app/shaders/planetfrag3.glsl';
 import planetvert1 from '@/app/shaders/planetvert1.glsl';
 import { useGSAP } from "@gsap/react";
 import Ready from "./Ready";
+import { color } from "three/tsl";
+import { BufferAttribute } from "three";
 
 const info = [
     { 
@@ -39,7 +41,7 @@ const info = [
                     'md': { x: 0, y: 1.5, z: 5.5 },
                     'sm': { x: -0.5, y: 2.5, z: 4 }
         }, 
-        labelPos: [-2, 1.5, 0] as [number, number, number] 
+        labelPos: [-4, 2.5, 2.5] as [number, number, number] 
     },
     { 
         id: "Projects", 
@@ -60,7 +62,7 @@ const info = [
                     'md': { x: -3, y: 0.7, z: 4 },
                     'sm': { x: -3.5, y: 1.5, z: 3 }
         },  
-        labelPos: [2.5, 1, 0] as [number, number, number] 
+        labelPos: [4, 1, 4] as [number, number, number] 
     },
     { 
         id: "Contacts", 
@@ -81,7 +83,7 @@ const info = [
                     'md': { x: -0.25, y: -3.5, z: 7.8 }, 
                     'sm': { x: -1.5, y: -4, z: 8 }
         },  
-        labelPos: [1, -1.5, 0] as [number, number, number] 
+        labelPos: [1, -3.5, 4] as [number, number, number] 
     }
 ]
 
@@ -133,26 +135,88 @@ function Background() {
     );
 }
 
+function RoundedShape({width, height, radius, segments}: { width: number; height: number; radius: number; segments: number }) {
+    
+    const n = (segments + 1) * 4;
+    let indices: number[] = [], positions: number[] = [], uvs: number[] = [];
+    let quadrant, signx, signy, x, y;
+    const geometry = new BufferGeometry();
+
+    function draw(j: number) {
+        quadrant = Math.trunc( 4 * j / n ) + 1;
+        signx = (quadrant === 1 || quadrant === 4) ? 1 : -1;
+        signy = quadrant < 3 ? 1 : -1;
+        x = signx * (width / 2 - radius) + radius * Math.cos(2 * Math.PI  * (j - quadrant + 1) / (n - 4));
+        y = signy * (height / 2 - radius) + radius * Math.sin(2 * Math.PI  * (j - quadrant + 1) / (n - 4));
+        positions.push(x, y, 0);
+        uvs.push(0.5 + x / width, 0.5 + y / height);
+    }
+
+    for (let i = 1; i < n+1; i++) indices.push(0, i, i + 1);
+    indices.push(0, n, 1);
+    positions.push(0, 0, 0);
+    uvs.push(0.5, 0.5);
+    for (let j = 1; j < n + 1; j++) draw(j);
+
+    geometry.setIndex(new BufferAttribute(new Uint32Array(indices), 1));
+    geometry.setAttribute('position', new BufferAttribute(new Float32Array(positions), 3));
+    geometry.setAttribute('uv', new BufferAttribute( new Float32Array(uvs), 2));
+    return geometry;
+}
+
 // Label for the spheres representing the different sections of the site
-function Label({ children }: { children: string }) {
+function Label({ hovered, selected, position, children }: { hovered: boolean; selected: string | null; position: [number, number, number]; children: string[] }) {
+
+    const labelRef = useRef<Group>(null);
+
+    useGSAP(() => {
+        if (labelRef.current && selected === null) {
+            gsap.to(labelRef.current.scale, {
+                duration: 0.5,
+                x: hovered ? 1 : 0.6,
+                y: hovered ? 1 : 0.6,
+                z: hovered ? 1 : 0.6,
+                ease: "power2.inOut",
+            });
+        }
+        else if (labelRef.current) {
+            gsap.to(labelRef.current.scale, {
+                duration: 0.5,
+                x: 0.6,
+                y: 0.6,
+                z: 0.6,
+                ease: "power2.inOut",
+            });
+            gsap.to(labelRef.current.children, {
+                duration: 0.5,
+                opacity: selected === null ? 1 : 0,
+            });
+        }
+        
+    }, [hovered, selected]);
+
     return (
-        <Float speed={1.3} rotationIntensity={0.3} floatIntensity={0.3}>
-            <Billboard> 
-                <Plane>
-                    <Text 
-                        font="/fonts/Climate_Crisis/ClimateCrisis-Regular-VariableFont_YEAR.ttf" 
-                        fontSize={2} 
+        <Billboard scale={1}> 
+            <Float speed={1.3} rotationIntensity={0.3} floatIntensity={0.3}>
+                <group ref={labelRef} scale={0.6}>
+                    <RoundedBox args={[2.8, 0.8, 0.1]} radius={0.1} bevelSegments={0} steps={0} position={position}>
+                        <meshPhysicalMaterial color="#2e1065" transparent opacity={0.7} thickness={0.7}/>
+                    </RoundedBox>
+                    <Text  
+                        fontWeight={800}
+                        fontSize={0.4} 
                         color="white" 
                         strokeColor="black" 
-                        strokeWidth={0.05} 
-                        position={[0, 1.5, 0]} 
+                        strokeWidth={0} 
+                        position={[position[0], position[1], position[2] + 0.01]} 
                         rotation={[0, 0, 0]}
+                        fillOpacity={1}
                     >
                         { children }
                     </Text>
-                </Plane>
-            </Billboard>
-        </Float>
+                </group>
+            </Float>
+        </Billboard>
     );
 }
 
@@ -177,38 +241,23 @@ function Sphere(props: SphereProps) {
     const materialRef = useRef(null);
     const jointID = props.id.replace(' ', '');
 
-    console.log(viewport.width, viewport.height);
+    const [hovered, setHovered] = useState(false);
 
-    // Adjust the scale based on the viewport size
     const scalefactor = viewport.width < 4.5 ? 0.8 : viewport.width < 10 ? 0.8 : 1; 
     const viewSize = viewport.width < 4.5 ? 'sm' : viewport.width < 10 ? 'md' : 'lg';
 
     const new_pos = props.position[viewSize as keyof typeof props.position];
-    /*
-    const new_position = [props.position[0] * viewport.width / 2,
-                          props.position[1] * viewport.height / 2, 
-                          props.position[2]
-                         ] as [number, number, number];
-    */
 
     const onHover = () => {
+        setHovered(true);
         if (props.selected === null) {
             document.body.style.cursor = 'pointer';
         }
-        gsap.to(`.${jointID}`, {
-            duration: 0.5,
-            scale: props.scale + .75,
-            ease: "power2.inOut"
-        });
     }
 
     const leaveHover = () => {
+        setHovered(false);
         document.body.style.cursor = 'default';
-        gsap.to(`.${jointID}`, {
-            duration: 0.5,
-            scale: props.scale,
-            ease: "power2.inOut"
-        });
     }
     
     const sphereHandler = () => {
@@ -235,13 +284,7 @@ function Sphere(props: SphereProps) {
                     }}
                 />
             </mesh>
-            <Float speed={1.3} rotationIntensity={0.3} floatIntensity={0.3}>
-                <Html position={props.labelPos} center>
-                    <div className={`${jointID} w-36 text-center text-white font-sans font-bold text-lg rounded-md bg-violet-950/60 backdrop-blur-md p-2 ${(props.selected !== null) ? 'animate-fadeOut opacity-0' : 'animate-fadeIn'}`} style={{ transform: `scale(${props.scale})`}} >
-                        {props.id.toUpperCase()}
-                    </div>
-                </Html>
-            </Float>
+            <Label hovered={hovered} selected={props.selected} position={props.labelPos}> {props.id.toUpperCase()} </Label>
         </group>
     );
 }
