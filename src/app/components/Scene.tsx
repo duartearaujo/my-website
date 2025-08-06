@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Billboard, Float, RoundedBox } from "@react-three/drei";
 import gsap from "gsap";
-import { Html } from "@react-three/drei";
 import { BufferGeometry, DirectionalLight, Group, MeshPhysicalMaterial, ShaderMaterial, SphereGeometry } from "three";
 import { Mesh } from "three";
 import { Text } from "@react-three/drei";
@@ -18,7 +17,6 @@ import planetfrag3 from '@/app/shaders/planetfrag3.glsl';
 import planetvert1 from '@/app/shaders/planetvert1.glsl';
 import { useGSAP } from "@gsap/react";
 import Ready from "./Ready";
-import { color } from "three/tsl";
 import { BufferAttribute } from "three";
 
 const info = [
@@ -176,30 +174,31 @@ function Label({ hovered, selected, position, children }: { hovered: boolean; se
                 x: hovered ? 1 : 0.6,
                 y: hovered ? 1 : 0.6,
                 z: hovered ? 1 : 0.6,
-                ease: "power2.inOut",
+                ease: "power2.inOut"
             });
         }
-        else if (labelRef.current) {
-            gsap.to(labelRef.current.scale, {
-                duration: 0.5,
-                x: 0.6,
-                y: 0.6,
-                z: 0.6,
-                ease: "power2.inOut",
-            });
-            gsap.to(labelRef.current.children, {
-                duration: 0.5,
-                opacity: selected === null ? 1 : 0,
-            });
-        }
-        
     }, [hovered, selected]);
+
+    useGSAP(() => {
+        if (labelRef.current) {
+            for (const child of labelRef.current.children) {
+                if (child instanceof Mesh) {
+                    gsap.to(child.material, {
+                        duration: 0.5,
+                        opacity: (selected === null) ? (child.name === "box" ? 0.7 : 1) : 0,
+                        ease: "power2.inOut",
+                        delay: (selected === null) ? 0.5 : 0.1
+                    });
+                }
+            }
+        }
+    }, [selected]);
 
     return (
         <Billboard scale={1}> 
-            <Float speed={1.3} rotationIntensity={0.3} floatIntensity={0.3}>
+            <Float speed={1.7} rotationIntensity={0.5} floatIntensity={0.5}>
                 <group ref={labelRef} scale={0.6}>
-                    <RoundedBox args={[2.8, 0.8, 0.1]} radius={0.1} bevelSegments={0} steps={0} position={position}>
+                    <RoundedBox name="box" args={[2.8, 0.8, 0.1]} radius={0.1} bevelSegments={0} steps={0} position={position}>
                         <meshPhysicalMaterial color="#2e1065" transparent opacity={0.7} thickness={0.7}/>
                     </RoundedBox>
                     <Text  
@@ -239,7 +238,6 @@ function Sphere(props: SphereProps) {
     const { viewport } = useThree();
     const sphereRef = useRef<Mesh>(null);
     const materialRef = useRef(null);
-    const jointID = props.id.replace(' ', '');
 
     const [hovered, setHovered] = useState(false);
 
