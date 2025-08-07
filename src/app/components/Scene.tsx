@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Billboard, Float, RoundedBox } from "@react-three/drei";
 import gsap from "gsap";
-import { BufferGeometry, DirectionalLight, Group, MeshPhysicalMaterial, ShaderMaterial, SphereGeometry } from "three";
+import { DirectionalLight, Group, MeshPhysicalMaterial, ShaderMaterial, SphereGeometry } from "three";
 import { Mesh } from "three";
 import { Text } from "@react-three/drei";
 import CustomShaderMaterial from "three-custom-shader-material";
@@ -17,7 +17,6 @@ import planetfrag3 from '@/app/shaders/planetfrag3.glsl';
 import planetvert1 from '@/app/shaders/planetvert1.glsl';
 import { useGSAP } from "@gsap/react";
 import Ready from "./Ready";
-import { BufferAttribute } from "three";
 
 const info = [
     { 
@@ -39,7 +38,9 @@ const info = [
                     'md': { x: 0, y: 1.5, z: 5.5 },
                     'sm': { x: -0.5, y: 2.5, z: 4 }
         }, 
-        labelPos: [-4, 2.5, 2.5] as [number, number, number] 
+        labelPos: [-2.5, 1.5, 1.5] as [number, number, number], 
+        labelScale: 1.2,
+        labelScaleHover: 1.5
     },
     { 
         id: "Projects", 
@@ -60,7 +61,9 @@ const info = [
                     'md': { x: -3, y: 0.7, z: 4 },
                     'sm': { x: -3.5, y: 1.5, z: 3 }
         },  
-        labelPos: [4, 1, 4] as [number, number, number] 
+        labelPos: [2, 1, 3] as [number, number, number],
+        labelScale: 1.2,
+        labelScaleHover: 1.5
     },
     { 
         id: "Contacts", 
@@ -81,7 +84,9 @@ const info = [
                     'md': { x: -0.25, y: -3.5, z: 7.8 }, 
                     'sm': { x: -1.5, y: -4, z: 8 }
         },  
-        labelPos: [1, -3.5, 4] as [number, number, number] 
+        labelPos: [1, -2.5, 3] as [number, number, number],
+        labelScale: 1.2,
+        labelScaleHover: 1.5
     }
 ]
 
@@ -133,6 +138,7 @@ function Background() {
     );
 }
 
+/*
 function RoundedShape({width, height, radius, segments}: { width: number; height: number; radius: number; segments: number }) {
     
     const n = (segments + 1) * 4;
@@ -161,6 +167,7 @@ function RoundedShape({width, height, radius, segments}: { width: number; height
     geometry.setAttribute('uv', new BufferAttribute( new Float32Array(uvs), 2));
     return geometry;
 }
+*/
 
 // Label for the spheres representing the different sections of the site
 function Label({ hovered, selected, position, children }: { hovered: boolean; selected: string | null; position: [number, number, number]; children: string[] }) {
@@ -168,7 +175,7 @@ function Label({ hovered, selected, position, children }: { hovered: boolean; se
     const labelRef = useRef<Group>(null);
 
     useGSAP(() => {
-        if (labelRef.current && selected === null) {
+        if (labelRef.current) {
             gsap.to(labelRef.current.scale, {
                 duration: 0.5,
                 x: hovered ? 1 : 0.6,
@@ -177,7 +184,7 @@ function Label({ hovered, selected, position, children }: { hovered: boolean; se
                 ease: "power2.inOut"
             });
         }
-    }, [hovered, selected]);
+    }, [hovered]);
 
     useGSAP(() => {
         if (labelRef.current) {
@@ -197,18 +204,15 @@ function Label({ hovered, selected, position, children }: { hovered: boolean; se
     return (
         <Billboard scale={1}> 
             <Float speed={1.7} rotationIntensity={0.5} floatIntensity={0.5}>
-                <group ref={labelRef} scale={0.6}>
-                    <RoundedBox name="box" args={[2.8, 0.8, 0.1]} radius={0.1} bevelSegments={0} steps={0} position={position}>
+                <group ref={labelRef} scale={0.4} position={position}>
+                    <RoundedBox name="box" args={[2.8, 0.8, 0.1]} radius={0.1} bevelSegments={0} steps={0}>
                         <meshPhysicalMaterial color="#2e1065" transparent opacity={0.7} thickness={0.7}/>
                     </RoundedBox>
                     <Text  
                         fontWeight={800}
                         fontSize={0.4} 
                         color="white" 
-                        strokeColor="black" 
-                        strokeWidth={0} 
-                        position={[position[0], position[1], position[2] + 0.01]} 
-                        rotation={[0, 0, 0]}
+                        position={[0, 0, 0.01]} 
                         fillOpacity={1}
                     >
                         { children }
