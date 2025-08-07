@@ -38,9 +38,15 @@ const info = [
                     'md': { x: 0, y: 1.5, z: 5.5 },
                     'sm': { x: -0.5, y: 2.5, z: 4 }
         }, 
-        labelPos: [-2.5, 1.5, 1.5] as [number, number, number], 
-        labelScale: 1.2,
-        labelScaleHover: 1.5
+        label: {
+            labelPos: {
+                        'lg': [-3, 1.5, 2.5] as [number, number, number],
+                        'md': [-2.5, 1.5, 3] as [number, number, number],
+                        'sm': [-1.5, 2, 3] as [number, number, number],
+            }, 
+            labelScale: 0.4,
+            labelScaleHover: 0.6
+        }
     },
     { 
         id: "Projects", 
@@ -61,9 +67,15 @@ const info = [
                     'md': { x: -3, y: 0.7, z: 4 },
                     'sm': { x: -3.5, y: 1.5, z: 3 }
         },  
-        labelPos: [2, 1, 3] as [number, number, number],
-        labelScale: 1.2,
-        labelScaleHover: 1.5
+        label: {
+            labelPos: {
+                        'lg': [3.5, 1, 3] as [number, number, number],
+                        'md': [2.5, 1, 3] as [number, number, number],
+                        'sm': [2, 1, 3] as [number, number, number],
+            },
+            labelScale: 0.6,
+            labelScaleHover: 1
+        }
     },
     { 
         id: "Contacts", 
@@ -83,10 +95,16 @@ const info = [
                     'lg': { x: -0.25, y: -3.6, z: 7.5 }, 
                     'md': { x: -0.25, y: -3.5, z: 7.8 }, 
                     'sm': { x: -1.5, y: -4, z: 8 }
-        },  
-        labelPos: [1, -2.5, 3] as [number, number, number],
-        labelScale: 1.2,
-        labelScaleHover: 1.5
+        }, 
+        label: { 
+            labelPos: {
+                    'lg': [1, -2.5, 3] as [number, number, number],
+                    'md': [1, -2.5, 3] as [number, number, number],
+                    'sm': [1, -2.5, 3] as [number, number, number],
+            },
+            labelScale: 1.2,
+            labelScaleHover: 2.5
+        }
     }
 ]
 
@@ -170,17 +188,23 @@ function RoundedShape({width, height, radius, segments}: { width: number; height
 */
 
 // Label for the spheres representing the different sections of the site
-function Label({ hovered, selected, position, children }: { hovered: boolean; selected: string | null; position: [number, number, number]; children: string[] }) {
+function Label({ hovered, selected, labelInfo, children }: { hovered: boolean; selected: string | null; labelInfo: { labelPos: {'sm': [number, number, number]; 'md': [number, number, number]; 'lg': [number, number, number]}; labelScale: number; labelScaleHover: number }; children: string[] }) {
 
+    const { viewport } = useThree();
     const labelRef = useRef<Group>(null);
+    const position = labelInfo.labelPos;
+    const labelScale = labelInfo.labelScale;
+    const labelScaleHover = labelInfo.labelScaleHover;
+
+    const viewSize = viewport.width < 4.5 ? 'sm' : viewport.width < 10 ? 'md' : 'lg';
 
     useGSAP(() => {
         if (labelRef.current) {
             gsap.to(labelRef.current.scale, {
                 duration: 0.5,
-                x: hovered ? 1 : 0.6,
-                y: hovered ? 1 : 0.6,
-                z: hovered ? 1 : 0.6,
+                x: hovered ? labelScaleHover : labelScale,
+                y: hovered ? labelScaleHover : labelScale,
+                z: hovered ? labelScaleHover : labelScale,
                 ease: "power2.inOut"
             });
         }
@@ -191,7 +215,7 @@ function Label({ hovered, selected, position, children }: { hovered: boolean; se
             for (const child of labelRef.current.children) {
                 if (child instanceof Mesh) {
                     gsap.to(child.material, {
-                        duration: 0.5,
+                        duration: 0.3,
                         opacity: (selected === null) ? (child.name === "box" ? 0.7 : 1) : 0,
                         ease: "power2.inOut",
                         delay: (selected === null) ? 0.5 : 0.1
@@ -204,7 +228,7 @@ function Label({ hovered, selected, position, children }: { hovered: boolean; se
     return (
         <Billboard scale={1}> 
             <Float speed={1.7} rotationIntensity={0.5} floatIntensity={0.5}>
-                <group ref={labelRef} scale={0.4} position={position}>
+                <group ref={labelRef} scale={labelScale} position={position[viewSize]}>
                     <RoundedBox name="box" args={[2.8, 0.8, 0.1]} radius={0.1} bevelSegments={0} steps={0}>
                         <meshPhysicalMaterial color="#2e1065" transparent opacity={0.7} thickness={0.7}/>
                     </RoundedBox>
@@ -230,7 +254,7 @@ type SphereProps = {
     frag: string;
     groupPos: { 'sm': { x: number; y: number; z: number }; 'md': { x: number; y: number; z: number }; 'lg': { x: number; y: number; z: number } } | { x: number; y: number; z: number };
     groupRtt: { 'sm': { x: number; y: number; z: number }; 'md': { x: number; y: number; z: number }; 'lg': { x: number; y: number; z: number } } | { x: number; y: number; z: number };
-    labelPos: [number, number, number];
+    label: { labelPos: {'sm': [number, number, number]; 'md': [number, number, number]; 'lg': [number, number, number]}; labelScale: number; labelScaleHover: number };
     selection: (id: string | null) => void;
     selected: string | null;
     setIsVisible: (id: string | null) => void;
@@ -286,7 +310,7 @@ function Sphere(props: SphereProps) {
                     }}
                 />
             </mesh>
-            <Label hovered={hovered} selected={props.selected} position={props.labelPos}> {props.id.toUpperCase()} </Label>
+            <Label hovered={hovered} selected={props.selected} labelInfo={props.label}> {props.id.toUpperCase()} </Label>
         </group>
     );
 }
@@ -380,7 +404,7 @@ function MeshGroup({ setIsVisible, selection, selected }: { setIsVisible: (id: s
                     frag={item.frag}
                     groupPos={item.groupPos}
                     groupRtt={item.groupRtt}
-                    labelPos={item.labelPos}
+                    label={item.label}
                     selected={selected}
                     selection={selection}
                     setIsVisible={setIsVisible}
