@@ -156,37 +156,6 @@ function Background() {
     );
 }
 
-/*
-function RoundedShape({width, height, radius, segments}: { width: number; height: number; radius: number; segments: number }) {
-    
-    const n = (segments + 1) * 4;
-    let indices: number[] = [], positions: number[] = [], uvs: number[] = [];
-    let quadrant, signx, signy, x, y;
-    const geometry = new BufferGeometry();
-
-    function draw(j: number) {
-        quadrant = Math.trunc( 4 * j / n ) + 1;
-        signx = (quadrant === 1 || quadrant === 4) ? 1 : -1;
-        signy = quadrant < 3 ? 1 : -1;
-        x = signx * (width / 2 - radius) + radius * Math.cos(2 * Math.PI  * (j - quadrant + 1) / (n - 4));
-        y = signy * (height / 2 - radius) + radius * Math.sin(2 * Math.PI  * (j - quadrant + 1) / (n - 4));
-        positions.push(x, y, 0);
-        uvs.push(0.5 + x / width, 0.5 + y / height);
-    }
-
-    for (let i = 1; i < n+1; i++) indices.push(0, i, i + 1);
-    indices.push(0, n, 1);
-    positions.push(0, 0, 0);
-    uvs.push(0.5, 0.5);
-    for (let j = 1; j < n + 1; j++) draw(j);
-
-    geometry.setIndex(new BufferAttribute(new Uint32Array(indices), 1));
-    geometry.setAttribute('position', new BufferAttribute(new Float32Array(positions), 3));
-    geometry.setAttribute('uv', new BufferAttribute( new Float32Array(uvs), 2));
-    return geometry;
-}
-*/
-
 // Label for the spheres representing the different sections of the site
 function Label({ hovered, selected, labelInfo, children }: { hovered: boolean; selected: string | null; labelInfo: { labelPos: {'sm': [number, number, number]; 'md': [number, number, number]; 'lg': [number, number, number]}; labelScale: number; labelScaleHover: number }; children: string[] }) {
 
